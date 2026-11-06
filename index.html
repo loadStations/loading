@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>หน้าหลัก - Tadio+ ดูทีวีและวิทยุออนไลน์</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff4757">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #2f3542;
+      --subtext: #747d8c;
+      --accent: #ff4757;
+      --accent-hover: #ff6b81;
+      --btn-bg: #f1f2f6;
+      --btn-border: #dfe4ea;
+    }
+    body.dark {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --text: #f1f2f6;
+      --subtext: #a4b0be;
+      --btn-bg: #2f3542;
+      --btn-border: #3d4452;
+    }
+    * { box-sizing: border-box; transition: background-color 0.25s, color 0.25s, transform 0.2s; }
+    body {
+      font-family: 'Kanit', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      border: 1px solid var(--btn-border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 16px;
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .theme-toggle:hover { transform: translateY(-2px); }
+    .container {
+      background-color: var(--card);
+      padding: 36px 32px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    .logo {
+      max-width: 130px;
+      border-radius: 16px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    p.subtitle {
+      margin: 0 0 24px;
+      font-size: 0.95rem;
+      color: var(--subtext);
+    }
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 0.9rem;
+      color: var(--subtext);
+      font-weight: 500;
+      border-top: 1px solid var(--btn-border);
+      padding-top: 20px;
+    }
+    .menu-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px 18px;
+      margin: 10px 0;
+      text-decoration: none;
+      color: var(--text);
+      background-color: var(--btn-bg);
+      border-radius: 12px;
+      border: 1px solid var(--btn-border);
+      font-weight: 500;
+    }
+    .menu-button.primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .menu-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.96);
+    }
+    .menu-button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌞 โหมดสว่าง</button>
+
+  <div class="container">
+    <img src="https://img2.pic.in.th/pic/1000021059.png" alt="โลโก้ Tadio+" class="logo">
+    <h1>Tadio+ Online</h1>
+    <p class="subtitle">เลือกรับชมทีวีสดและรับฟังวิทยุออนไลน์ฟรี</p>
+
+    <a href="tvonline.html" class="menu-button primary">📺 ทีวีออนไลน์</a>
+    <a href="radio.html" class="menu-button primary">📻 วิทยุออนไลน์</a>
+
+    <div class="section-title">เพิ่มเติม</div>
+    <a href="oldver/index.html" class="menu-button">🌐 สำหรับเบราว์เซอร์รุ่นเก่า</a>
+    <a href="https://www.appmarket24.com/app3514791-knvwz6" class="menu-button" target="_blank" rel="noopener noreferrer">📱 โหลดแอป Tadio+ บน Android</a>
+  </div>
+
+  <script>
+    const THEME_KEY = 'tadioplus_theme';
+    const body = document.body;
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        body.classList.add('dark');
+        themeToggle.textContent = '🌙 โหมดมืด';
+      } else {
+        body.classList.remove('dark');
+        themeToggle.textContent = '🌞 โหมดสว่าง';
+      }
+      localStorage.setItem(THEME_KEY, theme);
+      localStorage.setItem('theme', theme);
+      localStorage.setItem('tadio-theme', theme);
+    }
+
+    function toggleTheme() {
+      setTheme(body.classList.contains('dark') ? 'light' : 'dark');
+    }
+
+    const savedTheme = localStorage.getItem(THEME_KEY) || localStorage.getItem('theme') || localStorage.getItem('tadio-theme') || 'light';
+    setTheme(savedTheme);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

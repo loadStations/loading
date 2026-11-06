@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.tadiotv.app'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.tadiotv.app"
+        minSdk 17                 // รองรับตั้งแต่ Android 4.2 Jelly Bean ขึ้นไป
+        targetSdk 33
+        versionCode 4
+        versionName "2.2"
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    packagingOptions {
+        resources {
+            excludes += [
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE*',
+                'META-INF/NOTICE*'
+            ]
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // อัปเดตข้อมูลช่องและผังรายการอัตโนมัติ (2.8.1 เป็นรุ่นสุดท้ายที่รองรับ minSdk 17)
+    implementation 'androidx.work:work-runtime:2.8.1'
+
+    // ExoPlayer 2.18.7 รองรับ API 16+ สำหรับเล่นสตรีม HLS (.m3u8)
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.7'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:2.18.7'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.7'
+}

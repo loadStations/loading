@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv>
+  <channel id="iptv36.amarin">
+    <display-name>Amarin TV 34</display-name>
+    <display-name>iptv36.amarin</display-name>
+  </channel>
+  <channel id="iptv36.ch3">
+    <display-name>3HD</display-name>
+    <display-name>iptv36.ch3</display-name>
+  </channel>
+  <channel id="iptv36.ch7">
+    <display-name>7HD</display-name>
+    <display-name>iptv36.ch7</display-name>
+  </channel>
+  <channel id="iptv36.ch8">
+    <display-name>ช่อง 8</display-name>
+    <display-name>iptv36.ch8</display-name>
+  </channel>
+  <channel id="iptv36.gmm25">
+    <display-name>GMM25</display-name>
+    <display-name>iptv36.gmm25</display-name>
+  </channel>
+  <channel id="iptv36.mcot">
+    <display-name>MCOT HD</display-name>
+    <display-name>iptv36.mcot</display-name>
+  </channel>
+  <channel id="iptv36.mono29">
+    <display-name>MONOMAX Sports / MONO29</display-name>
+    <display-name>iptv36.mono29</display-name>
+  </channel>
+  <channel id="iptv36.nation">
+    <display-name>Nation TV 22</display-name>
+    <display-name>iptv36.nation</display-name>
+  </channel>
+  <channel id="iptv36.nbt">
+    <display-name>NBT 2HD</display-name>
+    <display-name>iptv36.nbt</display-name>
+  </channel>
+  <channel id="iptv36.one">
+    <display-name>ONE 31</display-name>
+    <display-name>iptv36.one</display-name>
+  </channel>
+  <channel id="iptv36.pptv">
+    <display-name>PPTV HD 36</display-name>
+    <display-name>iptv36.pptv</display-name>
+  </channel>
+  <channel id="iptv36.thaipbs">
+    <display-name>Thai PBS</display-name>
+    <display-name>iptv36.thaipbs</display-name>
+  </channel>
+  <channel id="iptv36.thairath">
+    <display-name>Thairath TV 32</display-name>
+    <display-name>iptv36.thairath</display-name>
+  </channel>
+  <channel id="iptv36.tnn16">
+    <display-name>TNN 16</display-name>
+    <display-name>iptv36.tnn16</display-name>
+  </channel>
+  <channel id="iptv36.tptv">
+    <display-name>TPTV โทรทัศน์รัฐสภา</display-name>
+    <display-name>iptv36.tptv</display-name>
+  </channel>
+  <channel id="iptv36.tsports7">
+    <display-name>T Sports 7</display-name>
+    <display-name>iptv36.tsports7</display-name>
+  </channel>
+  <channel id="iptv36.true4u">
+    <display-name>True4U 24</display-name>
+    <display-name>iptv36.true4u</display-name>
+  </channel>
+  <channel id="iptv36.tv5">
+    <display-name>5HD</display-name>
+    <display-name>iptv36.tv5</display-name>
+  </channel>
+  <channel id="iptv36.workpoint">
+    <display-name>Workpoint 23</display-name>
+    <display-name>iptv36.workpoint</display-name>
+  </channel>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Tadio+ TV - ดูทีวีออนไลน์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+  <link href="https://unpkg.com/@videojs/themes@1.0.1/dist/fantasy/index.css" rel="stylesheet">
+
+  <style>
+    :root { --bg: #f8f9fa; --panel: #ffffff; --accent: #ff4757; --text: #2f3542; --subtext: #747d8c; --border: #e8ecef; }
+    body.dark { --bg: #121212; --panel: #1e1e1e; --text: #f1f2f6; --subtext: #a4b0be; --border: #2f3542; }
+
+    * { box-sizing: border-box; transition: background 0.2s, color 0.2s; }
+    body { margin: 0; font-family: 'Kanit', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    header { padding: 0 20px; background: var(--panel); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); height: 60px; flex-shrink: 0; gap: 10px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .logo { font-weight: 600; font-size: 20px; color: var(--accent); }
+    .btn-action { cursor: pointer; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 18px; padding: 6px 14px; font-family: 'Kanit', sans-serif; font-size: 13px; text-decoration: none; }
+    .btn-action:hover { border-color: var(--accent); }
+
+    #app { display: flex; flex: 1; overflow: hidden; }
+
+    /* Player Section */
+    #playerWrap { flex: 1; background: #000; display: flex; flex-direction: column; position: relative; }
+    .video-js { width: 100% !important; height: 100% !important; }
+    body.fit-fill .video-js video { object-fit: fill !important; }
+    body.fit-contain .video-js video { object-fit: contain !important; }
+
+    .status-bar { padding: 10px 20px; background: var(--panel); font-size: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; color: var(--text); }
+
+    /* Sidebar */
+    #channels { width: 380px; background: var(--panel); display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+    .search-box { padding: 12px 15px 8px; }
+    input#search { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-family: 'Kanit', sans-serif; }
+    input#search:focus { border-color: var(--accent); }
+
+    .group-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 6px 15px 12px; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
+    .group-tab { padding: 4px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; white-space: nowrap; background: var(--bg); color: var(--subtext); border: 1px solid var(--border); }
+    .group-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    #list { flex: 1; overflow-y: auto; padding: 10px 12px; }
+    .channel { padding: 10px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; background: var(--bg); }
+    .channel:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .channel.active { background: var(--accent); color: #fff !important; border-color: var(--accent); }
+    .channel img { width: 46px; height: 46px; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px; flex-shrink: 0; }
+    .channel-info { display: flex; flex-direction: column; overflow: hidden; }
+    .channel-name { font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .channel-meta { font-size: 12px; opacity: 0.75; }
+
+    @media(max-width: 850px) {
+      body { overflow-y: auto; height: auto; }
+      #app { flex-direction: column; }
+      #playerWrap { height: 56.25vw; min-height: 240px; flex: none; position: sticky; top: 0; z-index: 100; }
+      #channels { width: 100%; border: none; height: auto; }
+    }
+  </style>
+</head>
+<body class="fit-contain">
+
+<header>
+  <a href="index.html" class="btn-action">← หน้าหลัก</a>
+  <div class="logo">Tadio+ TV</div>
+  <div class="header-actions">
+    <button onclick="toggleAspect()" id="aspectBtn" class="btn-action">📺 สัดส่วน: 16:9</button>
+    <button onclick="toggleTheme()" class="btn-action">🌗 ธีม</button>
+  </div>
+</header>
+
+<div id="app">
+  <div id="playerWrap">
+    <video id="my-video" class="video-js vjs-theme-fantasy" controls preload="auto" playsinline></video>
+    <div class="status-bar">
+      <span id="status">⏳ กำลังเตรียมความพร้อม...</span>
+      <span id="channel-count"></span>
+    </div>
+  </div>
+
+  <div id="channels">
+    <div class="search-box">
+      <input type="text" id="search" placeholder="🔍 ค้นหาชื่อช่อง หรือหมายเลขช่อง..." oninput="filterChannels()">
+    </div>
+    <div class="group-tabs" id="groupTabs"></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://unpkg.com/videojs-contrib-quality-levels@4.1.0/dist/videojs-contrib-quality-levels.min.js"></script>
+<script src="https://unpkg.com/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
+
+<script>
+  const BASE_WORKER_URL = "https://iptv.tadioplus.workers.dev";
+  const FALLBACK_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='55%' font-family='sans-serif' font-size='12' fill='%23666' text-anchor='middle'>TV</text></svg>";
+  let allChannels = [];
+  let currentGroup = "ทั้งหมด";
+  let activeChannelUrl = "";
+
+  // ระบบจัดการธีมเชื่อมโยงทุกหน้า
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    const theme = isDark ? 'dark' : 'light';
+    localStorage.setItem('tadioplus_theme', theme);
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('tadio-theme', theme);
+  }
+  const savedTheme = localStorage.getItem('tadioplus_theme') || localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') document.body.classList.add('dark');
+
+  // สลับอัตราส่วนภาพ 16:9 หรือ ยืดเต็มจอ
+  function toggleAspect() {
+    const isFill = document.body.classList.toggle('fit-fill');
+    document.body.classList.toggle('fit-contain', !isFill);
+    document.getElementById('aspectBtn').innerText = isFill ? "📺 สัดส่วน: เต็มจอ" : "📺 สัดส่วน: 16:9";
+  }
+
+  const player = videojs('my-video', {
+    fluid: true,
+    aspectRatio: '16:9',
+    fill: true,
+    autoplay: false,
+    liveui: true,
+    html5: { vhs: { overrideNative: true } }
+  });
+
+  if (player.hlsQualitySelector) {
+    player.hlsQualitySelector({ displayCurrentQuality: true });
+  }
+
+  async function loadM3U() {
+    document.getElementById('status').innerText = "⏳ กำลังดึงข้อมูลช่องรายการ...";
+    try {
+      const res = await fetch(`${BASE_WORKER_URL}/list`);
+      if (!res.ok) throw new Error("Worker unavailable");
+      const data = await res.text();
+      parseM3U(data);
+    } catch (e) {
+      try {
+        const fallbackRes = await fetch('tadio1.m3u');
+        const fallbackData = await fallbackRes.text();
+        parseM3U(fallbackData);
+      } catch (err) {
+        document.getElementById('status').innerText = "❌ ไม่สามารถโหลดรายการช่องได้";
+      }
+    }
+  }
+
+  function parseM3U(data) {
+    const lines = data.split(/\r?\n/);
+    allChannels = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.startsWith('#EXTINF:')) {
+        const name = line.split(',').slice(1).join(',').trim() || "Unknown";
+        const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+        const groupMatch = line.match(/group-title="([^"]*)"/);
+        const chnoMatch = line.match(/tvg-chno="([^"]*)"/);
+        const url = lines[i + 1]?.trim();
+
+        const group = groupMatch && groupMatch[1] ? groupMatch[1] : "อื่นๆ";
+        // กรองลิงก์ว่างเปล่า เช่น https:// และช่อง TEST
+        if (url && /^https?:\/\/.+/.test(url) && group.toUpperCase() !== "TEST") {
+          allChannels.push({
+            name,
+            url,
+            logo: logoMatch && logoMatch[1] ? logoMatch[1] : FALLBACK_LOGO,
+            group,
+            chno: chnoMatch ? chnoMatch[1] : ""
+          });
+        }
+      }
+    }
+    renderGroups();
+    filterChannels();
+    document.getElementById('status').innerText = `🟢 พร้อมรับชม (${allChannels.length} ช่อง)`;
+  }
+
+  function renderGroups() {
+    const groups = ["ทั้งหมด", ...new Set(allChannels.map(c => c.group))];
+    const container = document.getElementById('groupTabs');
+    container.innerHTML = "";
+    groups.forEach(g => {
+      const btn = document.createElement('button');
+      btn.className = 'group-tab' + (g === currentGroup ? ' active' : '');
+      btn.innerText = g;
+      btn.onclick = () => {
+        currentGroup = g;
+        renderGroups();
+        filterChannels();
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function render(data) {
+    const list = document.getElementById('list');
+    list.innerHTML = "";
+    document.getElementById('channel-count').innerText = `${data.length} ช่อง`;
+
+    data.forEach(ch => {
+      const div = document.createElement('div');
+      div.className = 'channel' + (ch.url === activeChannelUrl ? ' active' : '');
+      const chBadge = ch.chno ? `ช่อง ${ch.chno} • ` : '';
+      div.innerHTML = `
+        <img src="${ch.logo}" onerror="this.src='${FALLBACK_LOGO}'">
+        <div class="channel-info">
+          <span class="channel-name">${ch.name}</span>
+          <span class="channel-meta">${chBadge}${ch.group}</span>
+        </div>
+      `;
+      div.onclick = () => play(ch, div);
+      list.appendChild(div);
+    });
+  }
+
+  function play(ch, el) {
+    activeChannelUrl = ch.url;
+    const playUrl = ch.url.startsWith('http://')
+      ? `${BASE_WORKER_URL}/?url=` + encodeURIComponent(ch.url)
+      : ch.url;
+
+    document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('status').innerHTML = `📡 กำลังเล่น: <b>${ch.name}</b>`;
+
+    player.src({ src: playUrl, type: 'application/x-mpegURL' });
+    player.load();
+    player.play().catch(() => {});
+
+    if (window.innerWidth < 850) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function filterChannels() {
+    const txt = document.getElementById('search').value.toLowerCase().trim();
+    const filtered = allChannels.filter(c => {
+      const matchGroup = currentGroup === "ทั้งหมด" || c.group === currentGroup;
+      const matchText = c.name.toLowerCase().includes(txt) || (c.chno && c.chno.includes(txt));
+      return matchGroup && matchText;
+    });
+    render(filtered);
+  }
+
+  loadM3U();
+</script>
+</body>
+</html>

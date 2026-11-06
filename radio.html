@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Tadio+ ฟังวิทยุออนไลน์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    * { box-sizing: border-box; transition: background 0.25s, color 0.25s, transform 0.2s; }
+    body {
+      font-family: 'Kanit', sans-serif;
+      margin: 0; padding: 20px; text-align: center;
+      background-color: #f8f9fa; color: #2f3542;
+    }
+    body.dark { background-color: #121212; color: #f1f2f6; }
+
+    #home-link, #toggle-theme {
+      position: fixed; top: 15px; font-size: 14px; padding: 8px 16px;
+      border-radius: 20px; text-decoration: none; cursor: pointer; z-index: 1000;
+      border: 1px solid #dfe4ea; background: #fff; color: #2f3542;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-family: 'Kanit', sans-serif;
+    }
+    #home-link { left: 15px; }
+    #toggle-theme { right: 15px; }
+    body.dark #home-link, body.dark #toggle-theme { background: #1e1e1e; color: #f1f2f6; border-color: #2f3542; }
+
+    h1 { margin-top: 65px; font-size: 28px; color: #ff4757; letter-spacing: 0.5px; }
+
+    #search-input {
+      padding: 12px 22px; font-size: 16px; width: 100%; max-width: 420px;
+      margin-bottom: 25px; border-radius: 30px; border: 1px solid #ddd; outline: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+      background-color: #fff; color: #333; font-family: 'Kanit', sans-serif;
+    }
+    body.dark #search-input { background-color: #1e1e1e; color: #eee; border-color: #333; }
+    #search-input:focus { border-color: #ff4757; box-shadow: 0 0 12px rgba(255, 71, 87, 0.2); }
+
+    #now-playing {
+      margin: 10px auto 30px; max-width: 460px; background: #fff; padding: 25px;
+      border-radius: 24px; display: none; flex-direction: column; align-items: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+    body.dark #now-playing { background: #1e1e1e; box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+
+    #now-playing img {
+      width: 130px; height: 130px; border-radius: 20px; object-fit: cover;
+      margin-bottom: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.15); background: #fff;
+    }
+
+    #now-playing-text { font-size: 1.25em; font-weight: 600; margin-bottom: 4px; color: #ff4757; }
+    #now-playing-song { font-size: 0.9em; color: #666; margin-bottom: 8px; }
+    body.dark #now-playing-song { color: #aaa; }
+    #loading-status { font-size: 0.85em; color: #747d8c; margin-bottom: 14px; min-height: 20px; }
+
+    .controls { display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center; flex-wrap: wrap; }
+    .play-btn {
+      background: #ff4757; color: white; border: none; padding: 10px 32px;
+      border-radius: 25px; cursor: pointer; font-size: 17px; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); font-family: 'Kanit', sans-serif;
+    }
+    .play-btn:hover { background: #ff6b81; transform: translateY(-2px); }
+    .volume-container { display: flex; align-items: center; gap: 8px; }
+    input[type=range] { cursor: pointer; accent-color: #ff4757; width: 110px; }
+
+    ul.station-list {
+      list-style: none; padding: 0; display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 18px; max-width: 960px; margin: 0 auto;
+    }
+    .station-list li {
+      background: #fff; border-radius: 18px; padding: 15px; cursor: pointer;
+      border: 2px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    body.dark .station-list li { background: #1e1e1e; }
+    .station-list li:hover {
+      transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #ff4757;
+    }
+    .station-list li.active {
+      border-color: #ff4757; background: rgba(255, 71, 87, 0.08);
+    }
+    .station-list img { width: 96px; height: 96px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; background: #fff; }
+    .station-list span { display: block; font-size: 0.92em; font-weight: 500; height: 42px; overflow: hidden; }
+
+    #loading-stations { font-size: 1em; color: #747d8c; margin: 30px 0; }
+
+    footer {
+      margin-top: 50px; padding: 30px 20px; border-top: 1px solid #ddd;
+      font-size: 14px; color: #747d8c;
+    }
+    body.dark footer { border-top-color: #2f3542; color: #999; }
+    footer a { color: #ff4757; text-decoration: none; margin: 0 5px; }
+    footer a:hover { text-decoration: underline; }
+    .footer-links { margin-top: 10px; }
+
+    @media (max-width: 480px) {
+      ul.station-list { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" id="home-link">← กลับสู่หน้าหลัก</a>
+  <button id="toggle-theme">🌗 ธีม</button>
+
+  <h1>Tadio+ วิทยุออนไลน์</h1>
+  <input type="text" id="search-input" placeholder="🔍 ค้นหาคลื่นวิทยุ..." />
+
+  <audio id="radio-player" preload="none"></audio>
+
+  <div id="now-playing">
+    <img id="now-playing-image" src="" alt="Station" />
+    <div id="now-playing-text">เลือกสถานี</div>
+    <div id="now-playing-song">🎵 พร้อมรับฟังความสนุก</div>
+    <div id="loading-status"></div>
+    <div class="controls">
+      <button id="play-pause-btn" class="play-btn">Pause</button>
+      <div class="volume-container">
+        <span>🔈</span>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1">
+        <span>🔊</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading-stations">⏳ กำลังโหลดรายชื่อสถานี...</div>
+  <ul class="station-list" id="station-list"></ul>
+
+  <footer>
+    <p>© 2026 Tadio+ | ดูทีวีและฟังวิทยุออนไลน์ฟรี 24 ชั่วโมง</p>
+    <div class="footer-links">
+      <a href="https://forms.gle/Bh3rELNDStE91HiN8" target="_blank" rel="noopener">แจ้งปัญหาการใช้งาน</a> •
+      <a href="index.html">หน้าหลัก</a>
+    </div>
+  </footer>
+
+  <script>
+    const PROXY_URL = 'https://iptv.tadioplus.workers.dev/?url=';
+    const FALLBACK_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100%' height='100%' fill='%23ff4757'/><text x='50%' y='55%' font-family='sans-serif' font-size='18' fill='%23fff' text-anchor='middle'>RADIO</text></svg>";
+
+    const audioEl = document.getElementById('radio-player');
+    const btnPlayPause = document.getElementById('play-pause-btn');
+    const volumeSlider = document.getElementById('volume-slider');
+    const nowPlaying = document.getElementById('now-playing');
+    const nowPlayingText = document.getElementById('now-playing-text');
+    const nowPlayingImage = document.getElementById('now-playing-image');
+    const nowPlayingSong = document.getElementById('now-playing-song');
+    const loadingStatus = document.getElementById('loading-status');
+    const stationListContainer = document.getElementById('station-list');
+    const loadingStations = document.getElementById('loading-stations');
+    const searchInput = document.getElementById('search-input');
+    const themeBtn = document.getElementById('toggle-theme');
+
+    let hls = null;
+    let currentVol = 1;
+    let stationElements = [];
+    let currentStreamUrl = '';
+    let triedProxy = false;
+
+    const savedTheme = localStorage.getItem('tadioplus_theme') || localStorage.getItem('tadio-theme') || localStorage.getItem('theme');
+    if (savedTheme === 'dark') document.body.classList.add('dark');
+
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      const theme = isDark ? 'dark' : 'light';
+      localStorage.setItem('tadioplus_theme', theme);
+      localStorage.setItem('tadio-theme', theme);
+      localStorage.setItem('theme', theme);
+    });
+
+    async function loadStationsFromM3U() {
+      const localUrl = 'tadio_radio1.m3u';
+      const remoteUrl = 'https://raw.githubusercontent.com/teera3447/tadioplus/refs/heads/main/tadio_radio1.m3u';
+      try {
+        let response = await fetch(localUrl);
+        if (!response.ok) response = await fetch(remoteUrl);
+        const text = await response.text();
+        parseM3U(text);
+        loadingStations.style.display = 'none';
+      } catch (error) {
+        loadingStations.textContent = '❌ ไม่สามารถโหลดรายชื่อสถานีได้ กรุณาลองใหม่อีกครั้ง';
+      }
+    }
+
+    function parseM3U(data) {
+      const lines = data.split(/\r?\n/);
+      let currentLogo = '';
+      let currentName = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('#EXTINF:')) {
+          const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+          currentLogo = logoMatch ? logoMatch[1] : FALLBACK_IMG;
+          const parts = line.split(',');
+          currentName = parts.length > 1 ? parts.slice(1).join(',').trim() : 'Unknown Station';
+        } else if (line && !line.startsWith('#')) {
+          if (currentName) {
+            createStationElement(currentName, line, currentLogo);
+            currentName = '';
+            currentLogo = '';
+          }
+        }
+      }
+    }
+
+    function createStationElement(name, url, img) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <img src="${img}" alt="${name}" onerror="this.src='${FALLBACK_IMG}'">
+        <span>${name}</span>
+      `;
+      li.addEventListener('click', () => playStation(url, name, img, li));
+      stationListContainer.appendChild(li);
+      stationElements.push({ name, element: li });
+    }
+
+    function playStation(url, name, img, el) {
+      currentStreamUrl = url;
+      triedProxy = false;
+
+      document.querySelectorAll('.station-list li').forEach(item => item.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      nowPlayingText.textContent = name;
+      nowPlayingImage.src = img || FALLBACK_IMG;
+      nowPlayingImage.onerror = () => { nowPlayingImage.src = FALLBACK_IMG; };
+      nowPlaying.style.display = 'flex';
+      loadingStatus.textContent = "⏳ กำลังเชื่อมต่อสัญญาณ...";
+      nowPlayingSong.textContent = "🎵 Live Stream: " + name;
+      btnPlayPause.textContent = "Pause";
+      audioEl.volume = currentVol;
+
+      startStream(url, name, img);
+    }
+
+    function startStream(url, name, img) {
+      if (hls) { hls.destroy(); hls = null; }
+
+      if (url.includes('.m3u8') && Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(audioEl);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => audioEl.play().catch(() => {}));
+      } else {
+        audioEl.src = url;
+        audioEl.play().catch(() => {});
+      }
+
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: name,
+          artist: 'Tadio+ Radio Online',
+          artwork: [{ src: img || FALLBACK_IMG, sizes: '192x192', type: 'image/png' }]
+        });
+        navigator.mediaSession.setActionHandler('play', () => { audioEl.play(); btnPlayPause.textContent = "Pause"; });
+        navigator.mediaSession.setActionHandler('pause', () => { audioEl.pause(); btnPlayPause.textContent = "Play"; });
+      }
+    }
+
+    btnPlayPause.addEventListener('click', () => {
+      if (audioEl.paused) {
+        audioEl.play();
+        btnPlayPause.textContent = "Pause";
+      } else {
+        audioEl.pause();
+        btnPlayPause.textContent = "Play";
+        loadingStatus.textContent = "⏸️ หยุดชั่วคราว";
+      }
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      currentVol = e.target.value;
+      audioEl.volume = currentVol;
+    });
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase().trim();
+      stationElements.forEach(item => {
+        item.element.style.display = item.name.toLowerCase().includes(query) ? 'block' : 'none';
+      });
+    });
+
+    audioEl.addEventListener('playing', () => loadingStatus.textContent = "✅ กำลังออกอากาศ");
+    audioEl.addEventListener('waiting', () => loadingStatus.textContent = "⏳ กำลังโหลดข้อมูล...");
+    audioEl.addEventListener('error', () => {
+      if (!triedProxy && currentStreamUrl.startsWith('http://')) {
+        triedProxy = true;
+        loadingStatus.textContent = "🔄 สลับเชื่อมต่อผ่าน Proxy...";
+        startStream(PROXY_URL + encodeURIComponent(currentStreamUrl), nowPlayingText.textContent, nowPlayingImage.src);
+      } else {
+        loadingStatus.textContent = "❌ ลิงก์เสียหรือสัญญาณขาดหาย";
+        btnPlayPause.textContent = "Play";
+      }
+    });
+
+    loadStationsFromM3U();
+  </script>
+</body>
+</html>
